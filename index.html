@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrezzDev Number Database</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --gold: #FFD700;
+            --dark-gold: #D4AF37;
+            --black: #121212;
+            --gray: #1E1E1E;
+            --light-gray: #2E2E2E;
+            --white: #F0F0F0;
+            --neon-glow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--black);
+            color: var(--white);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 20%);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+            transition: margin-left 0.5s;
+        }
+
+        /* Sidebar/Dashboard */
+        .sidebar {
+            width: 60px;
+            background-color: var(--gray);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+            transition: all 0.5s;
+            overflow-x: hidden;
+        }
+
+        .sidebar.active {
+            width: 250px;
+        }
+
+        .sidebar-header {
+            padding: 20px 10px;
+            background-color: var(--dark-gold);
+            color: var(--black);
+            text-align: center;
+            font-weight: bold;
+            font-size: 1rem;
+            border-bottom: 2px solid var(--gold);
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .sidebar.active .sidebar-header {
+            font-size: 1.2rem;
+            padding: 20px;
+        }
+
+        .sidebar-menu {
+            padding: 10px 0;
+        }
+
+        .menu-item {
+            padding: 15px 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .sidebar.active .menu-item {
+            padding: 15px 20px;
+        }
+
+        .menu-item:hover {
+            background-color: var(--light-gray);
+            border-left: 4px solid var(--gold);
+            color: var(--gold);
+        }
+
+        .menu-item i {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .menu-item.active {
+            background-color: var(--light-gray);
+            border-left: 4px solid var(--gold);
+            color: var(--gold);
+        }
+
+        .menu-text {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .sidebar.active .menu-text {
+            opacity: 1;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 60px;
+            transition: margin-left 0.5s;
+        }
+
+        .main-content.shifted {
+            margin-left: 250px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: var(--gray);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-toggle {
+            font-size: 1.5rem;
+            margin-right: 20px;
+            cursor: pointer;
+            color: var(--gold);
+            transition: transform 0.3s;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(to right, var(--gold), #f9f295);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: var(--neon-glow);
+        }
+
+        .time-display {
+            display: flex;
+            gap: 15px;
+        }
+
+        .time-zone {
+            background-color: var(--light-gray);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .time-zone:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .time-zone.active {
+            background-color: rgba(255, 215, 0, 0.2);
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        /* Content Cards */
+        .card {
+            background-color: var(--gray);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            color: var(--gold);
+            font-weight: bold;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--gold);
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--light-gray);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 6px;
+            color: var(--white);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--gold);
+            color: var(--black);
+        }
+
+        .btn-primary:hover {
+            background-color: #e6c200;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: var(--light-gray);
+            color: var(--white);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 215, 0, 0.1);
+            color: var(--gold);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+        /* Table */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .table th, .table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .table th {
+            background-color: rgba(255, 215, 0, 0.1);
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .table tr:hover {
+            background-color: rgba(255, 215, 0, 0.05);
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Login Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal {
+            background-color: var(--gray);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--gold);
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .modal.active {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-header {
+            background: linear-gradient(to right, var(--dark-gold), var(--gold));
+            padding: 20px;
+            text-align: center;
+            color: var(--black);
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .login-logo .logo {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .login-logo p {
+            color: var(--gold);
+            font-size: 0.9rem;
+        }
+
+        .copyright {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #777;
+            margin-top: 20px;
+        }
+
+        /* Confirmation Modal */
+        .confirmation-modal {
+            text-align: center;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background-color: var(--light-gray);
+            border-left: 4px solid var(--gold);
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateX(150%);
+            transition: transform 0.3s;
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+        }
+
+        .notification.active {
+            transform: translateX(0);
+        }
+
+        .notification i {
+            margin-right: 10px;
+            color: var(--gold);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+            .sidebar.active {
+                width: 200px;
+            }
+            .main-content {
+                margin-left: 60px;
+            }
+            .main-content.shifted {
+                margin-left: 200px;
+            }
+            .time-display {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 60px;
+            }
+            .sidebar.active {
+                width: 100%;
+            }
+            .main-content {
+                margin-left: 60px;
+            }
+            .main-content.shifted {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal active">
+            <div class="modal-header">
+                Login Required
+            </div>
+            <div class="modal-body">
+                <div class="login-logo">
+                    <div class="logo">TrezzDev</div>
+                    <p>Number Database Management</p>
+                </div>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-input" id="loginUsername" placeholder="Enter your username" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" id="loginPassword" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+                <div class="copyright">© Trezz</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmationModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                Session Active
+            </div>
+            <div class="modal-body confirmation-modal">
+                <p>Another user is already logged in. Do you want to continue and log them out?</p>
+                <div class="confirmation-buttons">
+                    <button class="btn btn-secondary" id="confirmNo">
+                        <i class="fas fa-times"></i> No
+                    </button>
+                    <button class="btn btn-primary" id="confirmYes">
+                        <i class="fas fa-check"></i> Yes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationText">Operation successful</span>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-database"></i>
+                <span class="menu-text">TrezzDev</span>
+            </div>
+            <div class="sidebar-menu">
+                <div class="menu-item active" data-section="home">
+                    <i class="fas fa-home"></i>
+                    <span class="menu-text">Home</span>
+                </div>
+                <div class="menu-item" data-section="addNumber">
+                    <i class="fas fa-plus-circle"></i>
+                    <span class="menu-text">Add Number</span>
+                </div>
+                <div class="menu-item" data-section="checkNumber">
+                    <i class="fas fa-search"></i>
+                    <span class="menu-text">Check Number</span>
+                </div>
+                <div class="menu-item" data-section="viewAll">
+                    <i class="fas fa-list"></i>
+                    <span class="menu-text">View All</span>
+                </div>
+                <div class="menu-item dev-only" data-section="manageUsers" style="display: none;">
+                    <i class="fas fa-users-cog"></i>
+                    <span class="menu-text">Manage Users</span>
+                </div>
+                <div class="menu-item dev-only" data-section="databaseSettings" style="display: none;">
+                    <i class="fas fa-database"></i>
+                    <span class="menu-text">Database</span>
+                </div>
+                <div class="menu-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span class="menu-text">Settings</span>
+                </div>
+                <div class="menu-item" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="menu-text">Logout</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content" id="mainContent">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <div class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </div>
+                    <div class="logo">TrezzDev</div>
+                </div>
+                <div class="time-display">
+                    <div class="time-zone active" data-zone="WIB">
+                        WIB: <span id="timeWIB">00:00:00</span>
+                    </div>
+                    <div class="time-zone" data-zone="WITA">
+                        WITA: <span id="timeWITA">00:00:00</span>
+                    </div>
+                    <div class="time-zone" data-zone="WIT">
+                        WIT: <span id="timeWIT">00:00:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Home Section -->
+            <div class="content-section" id="homeSection">
+                <div class="card float" style="animation-delay: 0.2s;">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-info-circle"></i> Welcome to TrezzDev Number Database
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p>This system allows you to manage phone numbers in a secure GitHub database. You can add new numbers, check existing ones, and view all entries.</p>
+                        <p id="devMessage">Developer message goes here...</p>
+                    </div>
+                </div>
+
+                <div class="card float" style="animation-delay: 0.4s;">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-chart-line"></i> Database Statistics
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p>Total Numbers: <span id="totalNumbers">0</span></p>
+                        <p>Last Updated: <span id="lastUpdated">Never</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Number Section -->
+            <div class="content-section" id="addNumberSection" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-plus-circle"></i> Add New Number
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form id="addNumberForm">
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" class="form-input" id="newNumber" placeholder="Example: 6282225751054" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Add to Database
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Check Number Section -->
+            <div class="content-section" id="checkNumberSection" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-search"></i> Check Number
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form id="checkNumberForm">
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" class="form-input" id="checkNumber" placeholder="Enter number to check" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Check
+                            </button>
+                        </form>
+                        <div id="checkResult" style="margin-top: 20px; display: none;">
+                            <div class="card" style="background-color: rgba(255, 215, 0, 0.1);">
+                                <div class="card-body">
+                                    <p><strong>Number:</strong> <span id="resultNumber"></span></p>
+                                    <p><strong>Status:</strong> <span id="resultStatus"></span></p>
+                                    <p><strong>Added On:</strong> <span id="resultDate"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View All Numbers Section -->
+            <div class="content-section" id="viewAllSection" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-list"></i> All Numbers in Database
+                        </div>
+                        <button class="btn btn-secondary" id="refreshNumbers">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div style="overflow-x: auto;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Phone Number</th>
+                                        <th>Added On</th>
+                                        <th class="dev-only" style="display: none;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="numbersTable">
+                                    <!-- Numbers will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manage Users Section (Dev Only) -->
+            <div class="content-section" id="manageUsersSection" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-users-cog"></i> Manage Users
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card" style="margin-bottom: 20px;">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-user-plus"></i> Create New User
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <form id="createUserForm">
+                                    <div class="form-group">
+                                        <label class="form-label">Username</label>
+                                        <input type="text" class="form-input" id="newUsername" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Password</label>
+                                        <input type="password" class="form-input" id="newPassword" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Developer Account</label>
+                                        <select class="form-input" id="newUserDev">
+                                            <option value="no">No</option>
+                                            <option value="yes">Yes</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-user-plus"></i> Create User
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-users"></i> All Users
+                                </div>
+                                <button class="btn btn-secondary" id="refreshUsers">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Username</th>
+                                            <th>Account Type</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTable">
+                                        <!-- Users will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Database Settings Section (Dev Only) -->
+            <div class="content-section" id="databaseSettingsSection" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-database"></i> Database Settings
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card pulse" style="margin-bottom: 20px; animation-delay: 0.5s;">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-trash-alt"></i> Delete Database
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p>Warning: This will permanently delete all numbers in the database.</p>
+                                <button class="btn btn-danger" id="deleteDatabaseBtn">
+                                    <i class="fas fa-trash-alt"></i> Delete All Numbers
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-cloud-upload-alt"></i> Backup Database
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p>Download a backup of the current database.</p>
+                                <button class="btn btn-primary" id="backupDatabaseBtn">
+                                    <i class="fas fa-download"></i> Download Backup
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div class="content-section" id="settingsSection" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-cog"></i> Settings
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card" style="margin-bottom: 20px;">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-user-edit"></i> Change Password
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <form id="changePasswordForm">
+                                    <div class="form-group">
+                                        <label class="form-label">Current Password</label>
+                                        <input type="password" class="form-input" id="currentPassword" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">New Password</label>
+                                        <input type="password" class="form-input" id="newPasswordChange" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Confirm New Password</label>
+                                        <input type="password" class="form-input" id="confirmNewPassword" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-key"></i> Change Password
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card dev-only" style="margin-bottom: 20px; display: none;">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-edit"></i> Developer Message
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <form id="devMessageForm">
+                                    <div class="form-group">
+                                        <label class="form-label">Homepage Message</label>
+                                        <textarea class="form-input" id="devMessageInput" rows="4" required></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Save Message
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // GitHub API Configuration
+        const GITHUB_OWNER = 'TrezzDev';
+        const GITHUB_REPO = 'TrezzDev';
+        const FILE_PATH = 'TrezzDB.json';
+        const GITHUB_TOKEN = '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';
+        
+        // App State
+        let currentUser = null;
+        let database = { number: [] };
+        let users = {};
+        let activeTimeZone = 'WIB';
+        
+        // DOM Elements
+        const loginModal = document.getElementById('loginModal');
+        const loginForm = document.getElementById('loginForm');
+        const confirmationModal = document.getElementById('confirmationModal');
+        const confirmYes = document.getElementById('confirmYes');
+        const confirmNo = document.getElementById('confirmNo');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notificationText');
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menuToggle');
+        const mainContent = document.getElementById('mainContent');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const timeZones = document.querySelectorAll('.time-zone');
+        const contentSections = document.querySelectorAll('.content-section');
+        const menuItems = document.querySelectorAll('.menu-item');
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load users from localStorage
+            loadUsers();
+            
+            // Check if there's an active session
+            const activeSession = localStorage.getItem('activeSession');
+            if (activeSession) {
+                // Show confirmation modal
+                confirmationModal.style.display = 'flex';
+                document.querySelector('#confirmationModal .modal').classList.add('active');
+            } else {
+                // Show login modal
+                loginModal.querySelector('.modal').classList.add('active');
+            }
+            
+            // Initialize event listeners
+            initEventListeners();
+            
+            // Start clock
+            updateClock();
+            setInterval(updateClock, 1000);
+            
+            // Load default developer account if not exists
+            if (!users['TrezzDev']) {
+                users['TrezzDev'] = {
+                    password: 'TrezzKira',
+                    isDev: true
+                };
+                saveUsers();
+            }
+        });
+        
+        function initEventListeners() {
+            // Login form
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('loginUsername').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                if (authenticateUser(username, password)) {
+                    currentUser = username;
+                    localStorage.setItem('activeSession', username);
+                    showNotification('Login successful!');
+                    
+                    // Hide login modal
+                    loginModal.querySelector('.modal').classList.remove('active');
+                    setTimeout(() => {
+                        loginModal.style.display = 'none';
+                        
+                        // Load database
+                        loadDatabase();
+                    }, 300);
+                    
+                    // Update UI based on user role
+                    updateUIForUser();
+                } else {
+                    showNotification('Invalid username or password', 'error');
+                }
+            });
+            
+            // Confirmation modal buttons
+            confirmYes.addEventListener('click', () => {
+                const username = localStorage.getItem('activeSession');
+                const password = prompt(`Enter password for ${username}:`);
+                
+                if (authenticateUser(username, password)) {
+                    currentUser = username;
+                    showNotification('Session continued');
+                    
+                    // Hide confirmation modal
+                    confirmationModal.querySelector('.modal').classList.remove('active');
+                    setTimeout(() => {
+                        confirmationModal.style.display = 'none';
+                        
+                        // Load database
+                        loadDatabase();
+                    }, 300);
+                    
+                    // Update UI based on user role
+                    updateUIForUser();
+                } else {
+                    showNotification('Authentication failed', 'error');
+                }
+            });
+            
+            confirmNo.addEventListener('click', () => {
+                // Hide confirmation modal
+                confirmationModal.querySelector('.modal').classList.remove('active');
+                setTimeout(() => {
+                    confirmationModal.style.display = 'none';
+                    loginModal.style.display = 'flex';
+                    loginModal.querySelector('.modal').classList.add('active');
+                }, 300);
+            });
+            
+            // Menu toggle
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                mainContent.classList.toggle('shifted');
+            });
+            
+            // Menu items
+            menuItems.forEach(item => {
+                if (item.id !== 'logoutBtn') {
+                    item.addEventListener('click', () => {
+                        // Remove active class from all items
+                        menuItems.forEach(i => i.classList.remove('active'));
+                        
+                        // Add active class to clicked item
+                        item.classList.add('active');
+                        
+                        // Hide all content sections
+                        contentSections.forEach(section => {
+                            section.style.display = 'none';
+                        });
+                        
+                        // Show selected section
+                        const sectionId = item.getAttribute('data-section') + 'Section';
+                        document.getElementById(sectionId).style.display = 'block';
+                    });
+                }
+            });
+            
+            // Time zone selection
+            timeZones.forEach(zone => {
+                zone.addEventListener('click', () => {
+                    timeZones.forEach(z => z.classList.remove('active'));
+                    zone.classList.add('active');
+                    activeTimeZone = zone.getAttribute('data-zone');
+                });
+            });
+            
+            // Logout button
+            logoutBtn.addEventListener('click', () => {
+                currentUser = null;
+                localStorage.removeItem('activeSession');
+                showNotification('Logged out successfully');
+                
+                // Reset UI
+                resetUI();
+                
+                // Show login modal
+                loginModal.style.display = 'flex';
+                loginModal.querySelector('.modal').classList.add('active');
+            });
+            
+            // Add number form
+            document.getElementById('addNumberForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const number = document.getElementById('newNumber').value.trim();
+                
+                if (!number) {
+                    showNotification('Please enter a number', 'error');
+                    return;
+                }
+                
+                if (database.number.includes(number)) {
+                    showNotification('Number already exists in database', 'error');
+                    return;
+                }
+                
+                database.number.push(number);
+                saveDatabase();
+                document.getElementById('addNumberForm').reset();
+                showNotification('Number added successfully');
+                
+                // Update stats
+                updateStats();
+            });
+            
+            // Check number form
+            document.getElementById('checkNumberForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const number = document.getElementById('checkNumber').value.trim();
+                const result = document.getElementById('checkResult');
+                
+                if (!number) {
+                    showNotification('Please enter a number', 'error');
+                    return;
+                }
+                
+                if (database.number.includes(number)) {
+                    document.getElementById('resultNumber').textContent = number;
+                    document.getElementById('resultStatus').textContent = 'Exists in database';
+                    document.getElementById('resultStatus').style.color = 'lightgreen';
+                    // For demo purposes, using current date
+                    document.getElementById('resultDate').textContent = new Date().toLocaleString();
+                    result.style.display = 'block';
+                } else {
+                    document.getElementById('resultNumber').textContent = number;
+                    document.getElementById('resultStatus').textContent = 'Not found in database';
+                    document.getElementById('resultStatus').style.color = 'tomato';
+                    document.getElementById('resultDate').textContent = 'N/A';
+                    result.style.display = 'block';
+                }
+            });
+            
+            // Refresh numbers button
+            document.getElementById('refreshNumbers')?.addEventListener('click', () => {
+                loadDatabase();
+                showNotification('Numbers refreshed');
+            });
+            
+            // Create user form (Dev only)
+            document.getElementById('createUserForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('newUsername').value.trim();
+                const password = document.getElementById('newPassword').value;
+                const isDev = document.getElementById('newUserDev').value === 'yes';
+                
+                if (!username || !password) {
+                    showNotification('Please fill all fields', 'error');
+                    return;
+                }
+                
+                if (users[username]) {
+                    showNotification('Username already exists', 'error');
+                    return;
+                }
+                
+                users[username] = {
+                    password: password,
+                    isDev: isDev
+                };
+                
+                saveUsers();
+                document.getElementById('createUserForm').reset();
+                showNotification('User created successfully');
+                
+                // Refresh users table
+                renderUsersTable();
+            });
+            
+            // Refresh users button
+            document.getElementById('refreshUsers')?.addEventListener('click', () => {
+                loadUsers();
+                showNotification('Users refreshed');
+            });
+            
+            // Delete database button
+            document.getElementById('deleteDatabaseBtn')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to delete ALL numbers in the database? This cannot be undone!')) {
+                    database.number = [];
+                    saveDatabase();
+                    showNotification('All numbers deleted', 'warning');
+                }
+            });
+            
+            // Backup database button
+            document.getElementById('backupDatabaseBtn')?.addEventListener('click', () => {
+                const dataStr = JSON.stringify(database, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                const exportName = 'TrezzDB_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportName);
+                linkElement.click();
+                
+                showNotification('Backup downloaded');
+            });
+            
+            // Change password form
+            document.getElementById('changePasswordForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const currentPass = document.getElementById('currentPassword').value;
+                const newPass = document.getElementById('newPasswordChange').value;
+                const confirmPass = document.getElementById('confirmNewPassword').value;
+                
+                if (!users[currentUser]) {
+                    showNotification('User not found', 'error');
+                    return;
+                }
+                
+                if (users[currentUser].password !== currentPass) {
+                    showNotification('Current password is incorrect', 'error');
+                    return;
+                }
+                
+                if (newPass !== confirmPass) {
+                    showNotification('New passwords do not match', 'error');
+                    return;
+                }
+                
+                users[currentUser].password = newPass;
+                saveUsers();
+                document.getElementById('changePasswordForm').reset();
+                showNotification('Password changed successfully');
+            });
+            
+            // Developer message form
+            document.getElementById('devMessageForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const message = document.getElementById('devMessageInput').value;
+                localStorage.setItem('devMessage', message);
+                document.getElementById('devMessage').textContent = message;
+                document.getElementById('devMessageForm').reset();
+                showNotification('Message updated');
+            });
+        }
+        
+        function authenticateUser(username, password) {
+            if (users[username] && users[username].password === password) {
+                return true;
+            }
+            return false;
+        }
+        
+        function loadUsers() {
+            const storedUsers = localStorage.getItem('trezzDevUsers');
+            if (storedUsers) {
+                users = JSON.parse(storedUsers);
+            }
+        }
+        
+        function saveUsers() {
+            localStorage.setItem('trezzDevUsers', JSON.stringify(users));
+        }
+        
+        async function loadDatabase() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch database');
+                
+                const data = await response.json();
+                const content = atob(data.content);
+                database = JSON.parse(content);
+                
+                // Update UI
+                renderNumbersTable();
+                updateStats();
+                
+                // Update last updated time
+                const updatedAt = new Date(data.last_modified || data.created_at);
+                document.getElementById('lastUpdated').textContent = updatedAt.toLocaleString();
+                
+            } catch (error) {
+                console.error('Error loading database:', error);
+                showNotification('Failed to load database', 'error');
+            }
+        }
+        
+        async function saveDatabase() {
+            try {
+                // First get the current file to obtain its SHA (required for updates)
+                const getResponse = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                let sha = '';
+                if (getResponse.ok) {
+                    const getData = await getResponse.json();
+                    sha = getData.sha;
+                }
+                
+                // Prepare the update request
+                const content = JSON.stringify(database, null, 2);
+                const encodedContent = btoa(unescape(encodeURIComponent(content)));
+                
+                const updateResponse = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Update database - ${new Date().toISOString()}`,
+                        content: encodedContent,
+                        sha: sha || undefined
+                    })
+                });
+                
+                if (!updateResponse.ok) throw new Error('Failed to update database');
+                
+                showNotification('Database updated successfully');
+                renderNumbersTable();
+                updateStats();
+                
+            } catch (error) {
+                console.error('Error saving database:', error);
+                showNotification('Failed to update database', 'error');
+            }
+        }
+        
+        function renderNumbersTable() {
+            const tableBody = document.getElementById('numbersTable');
+            tableBody.innerHTML = '';
+            
+            database.number.forEach((number, index) => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${number}</td>
+                    <td>${new Date().toLocaleString()}</td>
+                    ${currentUser && users[currentUser]?.isDev ? 
+                        `<td><button class="btn btn-danger btn-sm delete-number" data-number="${number}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button></td>` : 
+                        '<td></td>'}
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-number').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const number = e.target.closest('button').getAttribute('data-number');
+                    if (confirm(`Delete number ${number}?`)) {
+                        database.number = database.number.filter(n => n !== number);
+                        saveDatabase();
+                    }
+                });
+            });
+        }
+        
+        function renderUsersTable() {
+            const tableBody = document.getElementById('usersTable');
+            tableBody.innerHTML = '';
+            
+            for (const username in users) {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${username} ${username === currentUser ? '(You)' : ''}</td>
+                    <td>${users[username].isDev ? 'Developer' : 'Regular User'}</td>
+                    <td>
+                        ${username !== currentUser ? 
+                            `<button class="btn btn-danger btn-sm delete-user" data-username="${username}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>` : 
+                            ''}
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            }
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-user').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const username = e.target.closest('button').getAttribute('data-username');
+                    if (confirm(`Delete user ${username}?`)) {
+                        delete users[username];
+                        saveUsers();
+                        renderUsersTable();
+                        showNotification('User deleted');
+                    }
+                });
+            });
+        }
+        
+        function updateStats() {
+            document.getElementById('totalNumbers').textContent = database.number.length;
+        }
+        
+        function updateUIForUser() {
+            const isDev = users[currentUser]?.isDev;
+            
+            // Show/hide dev-only elements
+            document.querySelectorAll('.dev-only').forEach(el => {
+                el.style.display = isDev ? '' : 'none';
+            });
+            
+            // Load developer message if exists
+            const devMessage = localStorage.getItem('devMessage');
+            if (devMessage) {
+                document.getElementById('devMessage').textContent = devMessage;
+                if (isDev) {
+                    document.getElementById('devMessageInput').value = devMessage;
+                }
+            }
+            
+            // Show home section by default
+            document.querySelector('.menu-item[data-section="home"]').click();
+        }
+        
+        function resetUI() {
+            // Hide all sections except home
+            contentSections.forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById('homeSection').style.display = 'block';
+            
+            // Reset active menu item
+            menuItems.forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector('.menu-item[data-section="home"]').classList.add('active');
+            
+            // Close sidebar if open
+            sidebar.classList.remove('active');
+            mainContent.classList.remove('shifted');
+        }
+        
+        function updateClock() {
+            const now = new Date();
+            
+            // WIB (UTC+7)
+            const wibTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+            document.getElementById('timeWIB').textContent = formatTime(wibTime);
+            
+            // WITA (UTC+8)
+            const witaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+            document.getElementById('timeWITA').textContent = formatTime(witaTime);
+            
+            // WIT (UTC+9)
+            const witTime = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+            document.getElementById('timeWIT').textContent = formatTime(witTime);
+        }
+        
+        function formatTime(date) {
+            return date.toISOString().substr(11, 8);
+        }
+        
+        function showNotification(message, type = 'success') {
+            notificationText.textContent = message;
+            
+            // Change icon based on type
+            const icon = notification.querySelector('i');
+            if (type === 'error') {
+                icon.className = 'fas fa-exclamation-circle';
+                notification.style.borderLeftColor = 'tomato';
+            } else {
+                icon.className = 'fas fa-check-circle';
+                notification.style.borderLeftColor = 'lightgreen';
+            }
+            
+            // Show notification
+            notification.classList.add('active');
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('active');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
